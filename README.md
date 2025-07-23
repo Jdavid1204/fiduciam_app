@@ -23,7 +23,7 @@ A Django web application that scrapes quotes from [quotes.toscrape.com](https://
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/fiduciam_app.git
+git clone https://github.com/jdavid1204/fiduciam_app.git
 cd fiduciam_app
 ```
 
