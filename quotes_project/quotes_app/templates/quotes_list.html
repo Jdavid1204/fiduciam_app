@@ -35,6 +35,18 @@
             font-size: 0.85rem;
             margin-right: 0.3rem;
         }
+        .author-credit {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 0.95rem;
+            color: #577189;
+            background: rgba(255,255,255);
+            padding: 10px 14px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -57,5 +69,8 @@
     {% else %}
         <p>No quotes found.</p>
     {% endif %}
+    <div class="author-credit">
+        Made by Jose David Marin Acosta
+    </div>
 </body>
 </html>

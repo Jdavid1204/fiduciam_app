@@ -44,22 +44,41 @@ def scrape(request):
 
 def quotes_by_author(request, author_id):
     """Display all quotes for a given author."""
-    author = get_object_or_404(Author, id=author_id)
-    quotes = Quote.objects.filter(author=author).select_related('author').prefetch_related('tags')
-    return render(request, 'quotes_list.html', {
-        'quotes': quotes,
-        'title': f'Quotes by {author.name}'
+    try:
+        author = get_object_or_404(Author, id=author_id)
+        quotes = Quote.objects.filter(author=author).select_related('author').prefetch_related('tags')
+        return render(request, 'quotes_list.html', {
+            'quotes': quotes,
+            'title': f'Quotes by {author.name}'
     })
+    except:
+        return render(request, 'quotes_list.html', {
+            'quotes': [],
+            'title': 'Author Not Found',
+            'entity_name': f'Author ID {author_id}',
+            'entity_type': 'author',
+            'not_found': True
+        })
 
 
 def quotes_by_tag(request, tag_id):
     """Display all quotes associated with a specific tag."""
-    tag = get_object_or_404(Tag, id=tag_id)
-    quotes = Quote.objects.filter(tags=tag).select_related('author').prefetch_related('tags')
-    return render(request, 'quotes_list.html', {
-        'quotes': quotes,
-        'title': f'Quotes tagged with "{tag.name_tag}"'
-    })
+    try:
+        tag = get_object_or_404(Tag, id=tag_id)
+        quotes = Quote.objects.filter(tags=tag).select_related('author').prefetch_related('tags')
+        return render(request, 'quotes_list.html', {
+            'quotes': quotes,
+            'title': f'Quotes tagged with "{tag.name_tag}"'
+        })
+    except:
+        return render(request, 'quotes_list.html', {
+            'quotes': [],
+            'title': 'Tag Not Found',
+            'entity_name': f'Tag ID {tag_id}',
+            'entity_type': 'tag',
+            'not_found': True
+        })
+
 
 
 def download(request):
