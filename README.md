@@ -7,7 +7,7 @@ A Django web application that scrapes quotes from [quotes.toscrape.com](https://
 - **Web Scraping**: Automatically scrapes quotes, authors, and tags from multiple pages
 - **Database Storage**: Efficient PostgreSQL storage with proper relationships
 - **Dynamic Filtering**: Filter quotes by author or tag with real-time dropdowns
-- **CSV Export**: Download all quotes in CSV format
+- **CSV Export**: Download all quotes in CSV format ( "Delete All Quotes" button included for testing purposes and quick database reset during development.)
 - **Bulk Operations**: Delete all quotes with confirmation modal
 - **Responsive UI**: Clean Bootstrap-based interface with dynamic updates
     
