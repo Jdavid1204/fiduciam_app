@@ -83,19 +83,26 @@ def quotes_by_tag(request, tag_id):
 
 def download(request):
     """Export all quotes, authors, and tags as a downloadable CSV."""
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="quotes.csv"'
+    try:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="quotes.csv"'
 
-    writer = csv.writer(response)
-    writer.writerow(['Quote', 'Author', 'Tags'])
+        writer = csv.writer(response)
+        writer.writerow(['Quote', 'Author', 'Tags'])
 
-    quotes = Quote.objects.select_related('author').prefetch_related('tags')
+        quotes = Quote.objects.select_related('author').prefetch_related('tags')
 
-    for quote in quotes:
-        tag_list = ', '.join(tag.name_tag for tag in quote.tags.all())
-        writer.writerow([quote.text, quote.author.name, tag_list])
+        for quote in quotes:
+            tag_list = ', '.join(tag.name_tag for tag in quote.tags.all())
+            writer.writerow([quote.text, quote.author.name, tag_list])
 
-    return response
+        return response
+    
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error', 
+            'message': str(e)
+        }, status=500)
 
 
 @csrf_exempt
