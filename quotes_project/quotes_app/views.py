@@ -80,7 +80,6 @@ def quotes_by_tag(request, tag_id):
         })
 
 
-
 def download(request):
     """Export all quotes, authors, and tags as a downloadable CSV."""
     try:
