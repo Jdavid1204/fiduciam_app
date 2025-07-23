@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+quotes_project/*.log
+quotes_project/db.sqlite3
+quotes_project/.env
+
+# Or use patterns that work from root:
+**/__pycache__/
+**/*.pyc
+**/.env
+*.log
+db.sqlite3
+
+# Virtual environments (in root or anywhere)
+venv/
+env/
+fiduciam/
+.env
+.env.local
+.env.production
+.env.development

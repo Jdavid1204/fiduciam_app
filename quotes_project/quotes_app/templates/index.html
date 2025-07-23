@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Scraper Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(to right, #007bff, #0056b3);
+        }
+        .card-header h2 {
+            font-size: 1.8rem;
+        }
+        .btn {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        select.form-select {
+            font-size: 0.95rem;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .alert {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header text-white text-center py-4">
+                        <h2 class="mb-0">Quote Scraper Dashboard</h2>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <p class="section-title">1. Scrape New Quotes</p>
+                        <button id="scrapeBtn" class="btn btn-primary w-100 mb-3 py-2">
+                            Get Quotes
+                        </button>
+                        <div id="status" class="mb-4"></div>
+
+                        <p class="section-title">2. Filter Quotes by Author</p>
+                        <div class="row align-items-center mb-3">
+                            <div class="col-8">
+                                <select id="authorSelect" class="form-select">
+                                    <option value="">Choose Author</option>
+                                    {% for author in authors %}
+                                        <option value="{{ author.id }}">{{ author.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <button id="authorBtn" class="btn btn-success w-100">Show Quotes By Author</button>
+                            </div>
+                        </div>
+
+                        <p class="section-title">3. Filter Quotes by Tag</p>
+                        <div class="row align-items-center mb-4">
+                            <div class="col-8">
+                                <select id="tagSelect" class="form-select"">
+                                    <option value="">Choose Tag</option>
+                                    {% for tag in tags %}
+                                        <option value="{{ tag.id }}">{{ tag.name_tag }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <button id="tagBtn" class="btn btn-success w-100">Show Quotes By Tag</button>
+                            </div>
+                        </div>
+                        <a href="{% url 'download' %}" class="btn btn-outline-secondary w-100">
+                            Data Dump
+                        </a>
+                        <button id="deleteBtn" class="btn btn-danger w-100 mt-3">Delete All Quotes</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong>ALL quotes</strong>?</p>
+                    <p class="text-danger"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.getElementById('scrapeBtn').onclick = async () => {
+            const btn = document.getElementById('scrapeBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            btn.textContent = 'Scraping...';
+            status.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div> Processing...';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/scrape/', { 
+                    method: 'POST',
+                });
+                const data = await response.json();
+                console.log(data);
+
+                status.innerHTML = `
+                    <div class="alert alert-success alert-sm">
+                        <strong>Complete!</strong> ${data.new_quotes} new quotes added
+                    </div>
+                `;
+                if (data.new_quotes > 0) {
+                    updateDropdowns(data.authors, data.tags);
+                }                
+            } catch (error) {
+                status.innerHTML = '<div class="alert alert-danger alert-sm">Scraping failed</div>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Get Quotes';
+            }
+        };
+
+        // Author/Tag functionality
+        document.getElementById('authorBtn').onclick = () => {
+            const id = document.getElementById('authorSelect').value;
+            if (id) window.open(`http://127.0.0.1:8000/author/${id}/`, '_blank');
+        };
+
+        document.getElementById('tagBtn').onclick = () => {
+            const id = document.getElementById('tagSelect').value;
+            if (id) window.open(`http://127.0.0.1:8000/tag/${id}/`, '_blank');
+        };
+
+
+        document.getElementById('deleteBtn').onclick = () => {
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        };
+
+        document.getElementById('confirmDeleteBtn').onclick = async () => {
+            const btn = document.getElementById('confirmDeleteBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/delete/', { 
+                    method: 'DELETE',
+                });
+                const data = await response.json();
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                modal.hide();
+
+                // Update status
+                status.innerHTML = `
+                    <div class="alert alert-warning alert-sm">
+                        <strong>Deleted!</strong> All quotes have been removed
+                    </div>
+                `;
+
+                // Clear dropdowns
+                updateDropdowns([], []);
+                
+            } catch (error) {
+                status.innerHTML = '<div class="alert alert-danger alert-sm">Delete failed</div>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Delete All';
+
+            }
+        };
+
+
+        // Function to update dropdowns without page reload
+        function updateDropdowns(authors, tags) {
+            try {
+                const authorSelect = document.getElementById('authorSelect');
+                const currentAuthor = authorSelect.value;
+                authorSelect.innerHTML = '<option value="">Choose Author</option>';
+                authors.forEach(author => {
+                    const selected = author.id == currentAuthor ? 'selected' : '';
+                    authorSelect.innerHTML += `<option value="${author.id}" ${selected}>${author.name}</option>`;
+                });
+                
+                // Update tag dropdown
+                const tagSelect = document.getElementById('tagSelect');
+                const currentTag = tagSelect.value;
+                tagSelect.innerHTML = '<option value="">Choose Tag</option>';
+                tags.forEach(tag => {
+                    const selected = tag.id == currentTag ? 'selected' : '';
+                    tagSelect.innerHTML += `<option value="${tag.id}" ${selected}>${tag.name_tag}</option>`;
+                });
+                
+            } catch (error) {
+                console.error('Failed to update dropdowns:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+

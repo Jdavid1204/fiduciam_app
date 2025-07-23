@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+        .quote-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .quote-text {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .quote-author {
+            font-weight: bold;
+            color: #333;
+        }
+        .quote-tags {
+            margin-top: 0.5rem;
+        }
+        .quote-tag {
+            display: inline-block;
+            background-color: #e0e0e0;
+            color: #555;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-right: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+
+    {% if quotes %}
+        {% for quote in quotes %}
+            <div class="quote-card">
+                <div class="quote-text">“{{ quote.text }}”</div>
+                <div class="quote-author">— {{ quote.author.name }}</div>
+                <div class="quote-tags">
+                    {% for tag in quote.tags.all %}
+                        <span class="quote-tag">{{ tag.name_tag }}</span>
+                    {% empty %}
+                        <span class="quote-tag">No tags</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No quotes found.</p>
+    {% endif %}
+</body>
+</html>
